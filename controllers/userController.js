@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Thought = require("../models/Thought");
 
 module.exports = {
   async getUsers(req, res) {
@@ -42,7 +43,7 @@ module.exports = {
       const newUser = await User.findOneAndUpdate(
         { _id: req.params.userId },
         req.body,
-        { new: true }
+        { runValidators: true, new: true }
       );
 
       res.status(200).json(newUser);
@@ -56,8 +57,73 @@ module.exports = {
     try {
       const result = await User.findOneAndDelete({ _id: req.params.userId });
 
-      res.status(200).json(result);
-      console.log(`The user with id ${req.params.userId} is deleted.`);
+      if (result.username) {
+        await Thought.deleteMany({
+          username: result.username,
+        });
+      }
+
+      res
+        .status(200)
+        .json({ message: `The user with id ${req.params.userId} is deleted.` });
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+
+  async addFriend(req, res) {
+    try {
+      console.log(`You are adding a friend with ID ${req.params.friendId}.`);
+
+      const user = await User.findOneAndUpdate(
+        {
+          _id: req.params.userId,
+        },
+        {
+          $addToSet: { friends: req.params.friendId },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+
+      if (!user) {
+        return res.status(404).json({
+          message: "No user found with that ID.",
+        });
+      }
+
+      res.status(200).json(user);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  },
+
+  async deleteFriend(req, res) {
+    try {
+      console.log(`You are deleting a friend with ID ${req.params.friendId}.`);
+
+      const user = await User.findOneAndUpdate(
+        {
+          _id: req.params.userId,
+        },
+        {
+          $pull: { friends: req.params.friendId },
+        },
+        {
+          runValidators: true,
+          new: true,
+        }
+      );
+
+      if (!user) {
+        return res.status(404).json({
+          message: "No user found with that ID.",
+        });
+      }
+
+      res.status(200).json(user);
     } catch (err) {
       res.status(500).json(err);
     }
