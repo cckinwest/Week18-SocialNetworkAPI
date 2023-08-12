@@ -31,6 +31,16 @@ module.exports = {
 
   async createThought(req, res) {
     try {
+      if (req.body.username) {
+        const user = await User.findOne({ username: req.body.username });
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ message: `No user with username ${req.body.username}` });
+        }
+      }
+
       const thought = await Thought.create(req.body);
 
       await User.findOneAndUpdate(
@@ -54,6 +64,16 @@ module.exports = {
 
   async updateThought(req, res) {
     try {
+      if (req.body.username) {
+        const user = await User.findOne({ username: req.body.username });
+
+        if (!user) {
+          return res
+            .status(404)
+            .json({ message: `No user with username ${req.body.username}` });
+        }
+      }
+
       const newThought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
         req.body,
