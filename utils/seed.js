@@ -25,16 +25,44 @@ connection.once("open", async () => {
   }
 
   const users = getUsers();
-  // Add students to the collection and await the results
   await User.collection.insertMany(users);
 
   const thoughts = getThoughts(50);
   await Thought.collection.insertMany(thoughts);
 
-  // Log out the seed data to indicate what should appear in the database
+  const userIds = (await User.find()).map((user) => user._id);
 
-  console.table(users);
-  console.table(thoughts);
+  for (let i = 0; i < userIds.length; i++) {
+    const friendsList = [];
+
+    const username = (await User.findOne({ _id: userIds[i] })).username;
+
+    const thoughtList = (await Thought.find({ username: username })).map(
+      (thought) => thought._id
+    );
+
+    for (let j = 0; j < 3; j++) {
+      var randomIndex = Math.floor(Math.random() * userIds.length);
+      if (randomIndex !== i) {
+        friendsList.push(userIds[randomIndex]);
+      }
+    }
+
+    await User.findOneAndUpdate(
+      { _id: userIds[i] },
+      {
+        $addToSet: {
+          friends: { $each: friendsList },
+          thoughts: { $each: thoughtList },
+        },
+      },
+      {
+        runValidators: true,
+        new: true,
+      }
+    );
+  }
+
   console.info("Seeding complete! 🌱");
   process.exit(0);
 });
