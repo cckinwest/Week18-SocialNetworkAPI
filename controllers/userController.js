@@ -56,16 +56,26 @@ module.exports = {
   async deleteUser(req, res) {
     try {
       const result = await User.findOneAndDelete({ _id: req.params.userId });
+      var deleteMessage = "";
 
       if (result.username) {
+        const thoughtIds = (
+          await Thought.find({ username: result.username })
+        ).map((thought) => thought._id);
+
         await Thought.deleteMany({
           username: result.username,
         });
+
+        thoughtIds.forEach((id) => {
+          deleteMessage += `The thought with ID ${id} is deleted.\n`;
+        });
       }
 
-      res
-        .status(200)
-        .json({ message: `The user with id ${req.params.userId} is deleted.` });
+      res.status(200).json(result);
+
+      console.log(`The user with id ${req.params.userId} is deleted.`);
+      console.log(deleteMessage);
     } catch (err) {
       res.status(500).json(err);
     }
