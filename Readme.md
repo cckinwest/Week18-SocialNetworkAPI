@@ -82,4 +82,4 @@ Because this application won’t be deployed, I’ll create a walkthrough video 
 
 The link is: [Social-Network-API](https://github.com/cckinwest/Week18-SocialNetworkAPI)
 
-The demo is: [Demo](https://drive.google.com/file/d/1jsWY8cxVyFI3C6dHsltou1AQzzDP0nPN/view)
+The demo is: [Demo](https://drive.google.com/file/d/1op_N2bFtm_50NPZLAJE0l1DvTpp5bxzh/view)

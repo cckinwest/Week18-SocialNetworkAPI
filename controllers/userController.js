@@ -40,11 +40,21 @@ module.exports = {
 
   async updateUser(req, res) {
     try {
+      const originalUsername = (await User.findOne({ _id: req.params.userId }))
+        .username;
+
       const newUser = await User.findOneAndUpdate(
         { _id: req.params.userId },
         req.body,
         { runValidators: true, new: true }
       );
+
+      if (req.body.username) {
+        await Thought.updateMany(
+          { username: originalUsername },
+          { username: req.body.username }
+        );
+      }
 
       res.status(200).json(newUser);
       console.log(`The user with id ${req.params.userId} is updated.`);
